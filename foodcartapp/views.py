@@ -3,7 +3,8 @@ import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.templatetags.static import static
-
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from .models import Order, OrderItem, Product
 
 
@@ -59,17 +60,15 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST'])
 def register_order(request):
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-
     order = Order.objects.create(
-        firstname=body['firstname'],
-        lastname=body['lastname'],
-        address=body['address'],
-        phonenumber=body['phonenumber'],
+        firstname=request.data['firstname'],
+        lastname=request.data['lastname'],
+        address=request.data['address'],
+        phonenumber=request.data['phonenumber'],
     )
-    for order_item in body['products']:
+    for order_item in request.data['products']:
         try:
             product = Product.objects.get(id=order_item['product'])
             OrderItem.objects.create(
@@ -80,4 +79,4 @@ def register_order(request):
         except ObjectDoesNotExist:
             print("The product doesn't exist.")
 
-    return JsonResponse({})
+    return Response({})
