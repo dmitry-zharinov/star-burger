@@ -1,4 +1,3 @@
-import json
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
@@ -6,6 +5,7 @@ from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Order, OrderItem, Product
+from rest_framework import status
 
 
 def banners_list_api(request):
@@ -68,6 +68,16 @@ def register_order(request):
         address=request.data['address'],
         phonenumber=request.data['phonenumber'],
     )
+
+    try:
+        if not request.data["products"] or not isinstance(
+            request.data["products"], list
+        ):
+            raise KeyError
+    except KeyError:
+        error = {"error": "products key not presented or not list"}
+        return Response(error, status=status.HTTP_200_OK)
+
     for order_item in request.data['products']:
         try:
             product = Product.objects.get(id=order_item['product'])
