@@ -70,13 +70,23 @@ def register_order(request):
     )
 
     try:
-        if not request.data["products"] or not isinstance(
-            request.data["products"], list
-        ):
-            raise KeyError
-    except KeyError:
-        error = {"error": "products key not presented or not list"}
-        return Response(error, status=status.HTTP_200_OK)
+        products = request.data['products']
+    except:
+        content = {'error': 'products: Обязательное поле.'}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
+    if isinstance(products, str):
+        content = {'error': 'products: Ожидался list со значениями, но был получен "str".'}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
+    if (products is None) or not products:
+        content = {'error': 'products: Этот список не может быть пустым.'}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
+    if (request.data['firstname'] is None) or not request.data['firstname']:
+        content = {'error': 'phonenumber: Этот список не может быть пустым.'}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
+    if (request.data['phonenumber'] is None) or not request.data['phonenumber']:
+        content = {'error': 'phonenumber: Этот список не может быть пустым.'}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
+
 
     for order_item in request.data['products']:
         try:
