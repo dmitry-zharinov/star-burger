@@ -5,7 +5,7 @@ from django.templatetags.static import static
 from phonenumbers import PhoneNumberFormat, is_valid_number
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.serializers import (ValidationError, ModelSerializer)
+from rest_framework.serializers import ValidationError, ModelSerializer
 
 from .models import Order, OrderItem, Product
 
@@ -69,11 +69,14 @@ class OrderItemSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    products = OrderItemSerializer(many=True, allow_null=False)
+    products = OrderItemSerializer(many=True,
+                                   allow_null=False,
+                                   write_only=True)
 
     class Meta:
         model = Order
         fields = ['products',
+                  'id',
                   'firstname',
                   'lastname',
                   'phonenumber',
@@ -98,18 +101,19 @@ class OrderSerializer(ModelSerializer):
 @api_view(['POST'])
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+    if serializer.is_valid(raise_exception=True):
+        order = Order.objects.create(
+            firstname=serializer.validated_data['firstname'],
+            lastname=serializer.validated_data['lastname'],
+            address=serializer.validated_data['address'],
+            phonenumber=serializer.validated_data['phonenumber'],
+        )
 
-    order = Order.objects.create(
-        firstname=serializer.validated_data['firstname'],
-        lastname=serializer.validated_data['lastname'],
-        address=serializer.validated_data['address'],
-        phonenumber=serializer.validated_data['phonenumber'],
-    )
-
-    order_items_fields = serializer.validated_data['products']
-    order_items = [OrderItem(order=order,
-                             **fields) for fields in order_items_fields]
-    OrderItem.objects.bulk_create(order_items)
-
-    return Response({})
+        order_items_fields = serializer.validated_data['products']
+        order_items = [OrderItem(order=order,
+                                 **fields) for fields in order_items_fields]
+        OrderItem.objects.bulk_create(order_items)
+        response_data = serializer.data
+        response_data['id'] = order.id
+        return Response(response_data)
+    return Response(serializer.errors)
