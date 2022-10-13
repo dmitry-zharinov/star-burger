@@ -1,9 +1,11 @@
 from pickletools import decimalnl_long
-from django.db import models
+
 from django.core.validators import MinValueValidator
-from phonenumber_field.modelfields import PhoneNumberField
-from django.db.models import F, Sum, Prefetch
+from django.db import models
+from django.db.models import F, Prefetch, Sum
 from django.db.models.query import QuerySet
+from django.utils import timezone
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Restaurant(models.Model):
@@ -171,6 +173,23 @@ class Order(models.Model):
         'комментарий к заказу',
         default='',
         blank=True,
+    )
+    created_at = models.DateTimeField(
+        'дата заказа',
+        default=timezone.now,
+        db_index=True,
+    )
+    called_at = models.DateTimeField(
+        'дата звонка',
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    delivered_at = models.DateTimeField(
+        'дата доставки',
+        null=True,
+        blank=True,
+        db_index=True,
     )
     objects = OrderQuerySet.as_manager()
 
