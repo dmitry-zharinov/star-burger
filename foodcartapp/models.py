@@ -145,6 +145,11 @@ class Order(models.Model):
         ('PROCESS', 'В обработке'),
         ('DELIVERED', 'Доставлен'),
     )
+    ORDER_PAYMENT_CHOICES = (
+        ('NONE', 'Не указан'),
+        ('CASH', 'Наличные'),
+        ('CARD', 'Картой'),
+    )
     firstname = models.CharField(
         'имя',
         max_length=50
@@ -167,6 +172,13 @@ class Order(models.Model):
         max_length=9,
         choices=ORDER_STATUS_CHOICES,
         default='NEW',
+        db_index=True,
+    )
+    payment = models.CharField(
+        'способ оплаты',
+        max_length=4,
+        choices=ORDER_PAYMENT_CHOICES,
+        default='NONE',
         db_index=True,
     )
     comment = models.TextField(
