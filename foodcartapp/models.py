@@ -138,6 +138,11 @@ class OrderQuerySet(QuerySet):
 
 
 class Order(models.Model):
+    ORDER_STATUS_CHOICES = (
+        ('NEW', 'Новый'),
+        ('PROCESS', 'В обработке'),
+        ('DELIVERED', 'Доставлен'),
+    )
     firstname = models.CharField(
         'имя',
         max_length=50
@@ -154,6 +159,13 @@ class Order(models.Model):
     phonenumber = PhoneNumberField(
         'телефон',
         max_length=20
+    )
+    status = models.CharField(
+        'статус',
+        max_length=9,
+        choices=ORDER_STATUS_CHOICES,
+        default='NEW',
+        db_index=True,
     )
     objects = OrderQuerySet.as_manager()
 
