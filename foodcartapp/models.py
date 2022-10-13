@@ -1,3 +1,4 @@
+from pickletools import decimalnl_long
 from django.db import models
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
@@ -132,7 +133,7 @@ class OrderQuerySet(QuerySet):
             Prefetch('products', queryset=OrderItem.objects.prefetch_related('product'))
         ).annotate(
             price=Sum(F('products__quantity') *
-                      F('products__product__price'))
+                      F('products__price'))
         )
 
 
@@ -177,9 +178,15 @@ class OrderItem(models.Model):
         related_name='products',
         verbose_name='заказ',
     )
-    quantity = models.IntegerField(
+    quantity = models.PositiveIntegerField(
         'количество',
         default=1,
+    )
+    price = models.DecimalField(
+        'цена',
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)]
     )
 
     class Meta:
