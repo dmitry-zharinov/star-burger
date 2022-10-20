@@ -105,7 +105,7 @@ def view_orders(request):
             ])
             order_restaurants.append(product_rests)
         order.suitable_restaurants = set.intersection(*order_restaurants)
-    
+
     return render(request, template_name='order_items.html', context={
         'orders': orders,
     })
