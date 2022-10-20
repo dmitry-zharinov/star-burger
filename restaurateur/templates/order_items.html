@@ -37,7 +37,7 @@
         <td>{{order.comment}}</td>
         <td>
           {% if order.restaurant %}
-            {{order.restaurant}}
+            Готовит {{order.restaurant}}
           {% else %}
             <details>
               <summary>Развернуть</summary>
@@ -46,7 +46,7 @@
                     <li>Ни один ресторан не может приготовить заказ полностью.</li>
                   {% else %}
                     {% for restaurant in order.suitable_restaurants %}
-                      <li>{{ restaurant.name }}</li>
+                      <li>{{ restaurant.name }} - {{ restaurant.distance_text }}</li>
                     {% endfor %}
                   {% endif %}
                 </ul>

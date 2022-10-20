@@ -1,14 +1,13 @@
 from django import forms
-from django.shortcuts import redirect, render
-from django.views import View
-from django.urls import reverse_lazy
-from django.contrib.auth.decorators import user_passes_test
-
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.views import View
 
-
-from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
+from foodcartapp.geolocation import get_distance, get_distance_with_units
+from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
 
 
 class Login(forms.Form):
@@ -104,7 +103,18 @@ def view_orders(request):
                 if order_product.product == menu_item.product and menu_item.availability
             ])
             order_restaurants.append(product_rests)
-        order.suitable_restaurants = set.intersection(*order_restaurants)
+        suitable_restaurants = set.intersection(*order_restaurants)
+        for restaurant in suitable_restaurants:
+            restaurant.distance = get_distance(
+                order.address,
+                restaurant.address,
+            )
+            restaurant.distance_text = get_distance_with_units(restaurant.distance)
+        suitable_restaurants = sorted(
+            suitable_restaurants,
+            key=lambda restaurant: restaurant.distance
+        )
+        order.suitable_restaurants = suitable_restaurants
 
     return render(request, template_name='order_items.html', context={
         'orders': orders,
