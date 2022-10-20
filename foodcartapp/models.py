@@ -1,5 +1,3 @@
-from pickletools import decimalnl_long
-
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import F, Prefetch, Sum
@@ -132,7 +130,8 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(QuerySet):
     def fetch_with_price(self):
         return self.prefetch_related(
-            Prefetch('products', queryset=OrderItem.objects.prefetch_related('product'))
+            Prefetch('products',
+                     queryset=OrderItem.objects.prefetch_related('product'))
         ).annotate(
             price=Sum(F('products__quantity') *
                       F('products__price'))
@@ -218,6 +217,7 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.firstname} {self.lastname}, {self.address}"

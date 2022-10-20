@@ -4,10 +4,13 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
+from geopy.distance import distance
 
-from foodcartapp.geolocation import get_distance, get_distance_with_units
+from foodcartapp.geolocation import fetch_coordinates, get_distance_with_units
 from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
+from geolocation.models import Location
 
 
 class Login(forms.Form):
@@ -67,19 +70,19 @@ def view_products(request):
     restaurants = list(Restaurant.objects.order_by('name'))
     products = list(Product.objects.prefetch_related('menu_items'))
 
-    products_with_restaurant_availability = []
+    products_restaurant_availability = []
     for product in products:
         availability = {item.restaurant_id: item.availability
                         for item in product.menu_items.all()}
         ordered_availability = [availability.get(restaurant.id, False)
                                 for restaurant in restaurants]
 
-        products_with_restaurant_availability.append(
+        products_restaurant_availability.append(
             (product, ordered_availability)
         )
 
     return render(request, template_name="products_list.html", context={
-        'products_with_restaurant_availability': products_with_restaurant_availability,
+        'products_restaurant_availability': products_restaurant_availability,
         'restaurants': restaurants,
     })
 
@@ -91,25 +94,45 @@ def view_restaurants(request):
     })
 
 
+def get_or_create_location(address):
+    try:
+        location = Location.objects.get(address=address)
+        return location.lon, location.lat
+    except Location.DoesNotExist:
+        coordinates = fetch_coordinates(address)
+        if not coordinates:
+            return
+        lon, lat = coordinates
+        Location.objects.create(
+            address=address, lon=lon, lat=lat, updated_at=timezone.now()
+        )
+        return coordinates
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.filter(status='NEW').fetch_with_price()
-    restaurant_menu_items = RestaurantMenuItem.objects.all().select_related('restaurant', 'product')
+    restaurant_menu_items = RestaurantMenuItem.objects.all().select_related(
+        'restaurant', 'product'
+    )
     order_restaurants = []
     for order in orders:
         for order_product in order.products.all():
             product_rests = set([
                 menu_item.restaurant for menu_item in restaurant_menu_items
-                if order_product.product == menu_item.product and menu_item.availability
+                if order_product.product == menu_item.product
+                and menu_item.availability
             ])
             order_restaurants.append(product_rests)
         suitable_restaurants = set.intersection(*order_restaurants)
         for restaurant in suitable_restaurants:
-            restaurant.distance = get_distance(
-                order.address,
-                restaurant.address,
+            restaurant.distance = distance(
+                get_or_create_location(order.address),
+                get_or_create_location(restaurant.address)
+            ).km
+            restaurant.distance_text = get_distance_with_units(
+                restaurant.distance
             )
-            restaurant.distance_text = get_distance_with_units(restaurant.distance)
         suitable_restaurants = sorted(
             suitable_restaurants,
             key=lambda restaurant: restaurant.distance
