@@ -1,6 +1,8 @@
 import requests
 from django.conf import settings
+from django.utils import timezone
 
+from geolocation.models import Location
 
 APIKEY = settings.YANDEX_GEOCODER_API_KEY
 
@@ -30,3 +32,18 @@ def get_distance_with_units(distance):
     if distance < 1:
         distance_with_units = f"{int(distance*1000)} м"
     return distance_with_units
+
+
+def get_or_create_location(address):
+    try:
+        location = Location.objects.get(address=address)
+        return location.lon, location.lat
+    except Location.DoesNotExist:
+        coordinates = fetch_coordinates(address)
+        if not coordinates:
+            return
+        lon, lat = coordinates
+        Location.objects.create(
+            address=address, lon=lon, lat=lat, updated_at=timezone.now()
+        )
+        return coordinates

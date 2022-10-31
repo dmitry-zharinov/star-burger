@@ -4,12 +4,13 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.views import View
 from geopy.distance import distance
 
-from foodcartapp.geolocation import fetch_coordinates, get_distance_with_units
 from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
+from geolocation.geolocation import (fetch_coordinates,
+                                     get_distance_with_units,
+                                     get_or_create_location)
 from geolocation.models import Location
 
 
@@ -92,21 +93,6 @@ def view_restaurants(request):
     return render(request, template_name="restaurants_list.html", context={
         'restaurants': Restaurant.objects.all(),
     })
-
-
-def get_or_create_location(address):
-    try:
-        location = Location.objects.get(address=address)
-        return location.lon, location.lat
-    except Location.DoesNotExist:
-        coordinates = fetch_coordinates(address)
-        if not coordinates:
-            return
-        lon, lat = coordinates
-        Location.objects.create(
-            address=address, lon=lon, lat=lat, updated_at=timezone.now()
-        )
-        return coordinates
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
