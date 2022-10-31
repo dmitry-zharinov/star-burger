@@ -226,13 +226,13 @@ class OrderItem(models.Model):
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
-        related_name='order',
+        related_name='order_items',
         verbose_name='товар',
     )
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='products',
+        related_name='items',
         verbose_name='заказ',
     )
     quantity = models.PositiveIntegerField(
