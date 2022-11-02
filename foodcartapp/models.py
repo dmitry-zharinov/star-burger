@@ -201,7 +201,7 @@ class Order(models.Model):
         blank=True,
         db_index=True,
     )
-    restaurant = models.ForeignKey(
+    fulfilling_restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.SET_NULL,
         related_name='orders',
