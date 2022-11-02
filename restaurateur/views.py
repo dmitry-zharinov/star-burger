@@ -103,7 +103,7 @@ def view_orders(request):
     )
     order_restaurants = []
     for order in orders:
-        for order_product in order.products.all():
+        for order_product in order.items.all():
             product_rests = set([
                 menu_item.restaurant for menu_item in restaurant_menu_items
                 if order_product.product == menu_item.product
