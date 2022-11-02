@@ -4,7 +4,7 @@ from django.templatetags.static import static
 from django.utils.html import format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from star_burger.settings import ALLOWED_HOSTS
+from django.conf import settings
 
 from .models import (Order, OrderItem, Product, ProductCategory, Restaurant,
                      RestaurantMenuItem)
@@ -133,6 +133,6 @@ class OrderAdmin(admin.ModelAdmin):
             return super().response_change(request, obj)
         if url_has_allowed_host_and_scheme(
             request.GET['next'],
-            ALLOWED_HOSTS
+            settings.ALLOWED_HOSTS
         ):
             return redirect(request.GET['next'])
