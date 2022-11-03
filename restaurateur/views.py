@@ -8,10 +8,8 @@ from django.views import View
 from geopy.distance import distance
 
 from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
-from geolocation.geolocation import (fetch_coordinates,
-                                     get_distance_with_units,
-                                     get_or_create_location)
-from geolocation.models import Location
+from geolocation.geolocation import (get_distance_with_units,
+                                     get_or_create_locations)
 
 
 class Login(forms.Form):
@@ -101,6 +99,15 @@ def view_orders(request):
     restaurant_menu_items = RestaurantMenuItem.objects.all().select_related(
         'restaurant', 'product'
     )
+
+    order_addresses = [order.address for order in orders]
+    restaurant_addresses = [
+        restaurant.address for restaurant in Restaurant.objects.all()
+    ]
+    locations = get_or_create_locations(
+        *order_addresses, *restaurant_addresses
+    )
+
     order_restaurants = []
     for order in orders:
         for order_product in order.items.all():
@@ -110,11 +117,12 @@ def view_orders(request):
                 and menu_item.availability
             ])
             order_restaurants.append(product_rests)
+        order_location = locations.get(order.address, None)
         suitable_restaurants = set.intersection(*order_restaurants)
         for restaurant in suitable_restaurants:
+            restaurant_location = locations.get(restaurant.address, None)
             restaurant.distance = distance(
-                get_or_create_location(order.address),
-                get_or_create_location(restaurant.address)
+                order_location, restaurant_location
             ).km
             restaurant.distance_text = get_distance_with_units(
                 restaurant.distance

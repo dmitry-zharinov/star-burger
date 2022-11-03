@@ -34,16 +34,20 @@ def get_distance_with_units(distance):
     return distance_with_units
 
 
-def get_or_create_location(address):
-    try:
-        location = Location.objects.get(address=address)
-        return location.lon, location.lat
-    except Location.DoesNotExist:
+def get_or_create_locations(*addresses):
+    existed_locations = {
+        location.address: (location.lon, location.lat)
+        for location in Location.objects.filter(address__in=addresses)
+    }
+    for address in addresses:
+        if address in existed_locations.keys():
+            continue
         coordinates = fetch_coordinates(address)
         if not coordinates:
-            return
+            continue
         lon, lat = coordinates
-        Location.objects.create(
-            address=address, lon=lon, lat=lat, updated_at=timezone.now()
+        location = Location.objects.create(
+            address=address, lon=lon, lat=lat
         )
-        return coordinates
+        existed_locations[location.address] = (location.lon, location.lat)
+    return existed_locations
