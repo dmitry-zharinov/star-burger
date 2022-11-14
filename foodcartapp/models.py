@@ -226,7 +226,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
-        related_name='orders',
+        related_name='order_items',
         verbose_name='товар',
     )
     order = models.ForeignKey(
@@ -252,4 +252,4 @@ class OrderItem(models.Model):
         verbose_name_plural = 'элементы заказа'
 
     def __str__(self):
-        return f"{self.product.name}"
+        return self.product.name
