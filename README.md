@@ -59,6 +59,11 @@ pip install -r requirements.txt
 SECRET_KEY=
 ```
 
+[Зарегистрируйте геокодер Яндекса](https://yandex.ru/dev/maps/geocoder/) для вычисления расстояния до ближайших ресторанов и заполните ключ:
+```sh
+YANDEX_GEOCODER_API_KEY=
+```
+
 Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
 
 ```sh
