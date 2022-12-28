@@ -8,3 +8,4 @@ geopy==2.2.0
 requests==2.28.1
 phonenumbers==8.12.*
 rollbar==0.16.*
+psycopg2-binary==2.9.*
