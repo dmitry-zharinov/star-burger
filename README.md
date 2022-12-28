@@ -69,7 +69,13 @@ YANDEX_GEOCODER_API_KEY=
 ROLLBAR_ACCESS_TOKEN=
 ```
 
-Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
+Используется СУБД Postgres. Если Postgres не установлен, см. [Туториал о подключении Postgres](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04). 
+Создайте базу данных в Postgres и запишите данные для подключения к ней в переменную окружения `DATABASE_URL`.
+```sh
+DATABASE_URL=postgres://user:password@localhost:5432/db_name
+```
+
+Отмигрируйте базу данных следующей командой:
 
 ```sh
 python manage.py migrate
@@ -160,6 +166,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `YANDEX_GEOCODER_API_KEY` — ключ геокодера Яндекса для вычисления расстояния до ближайших ресторанов, [см. документацию](https://yandex.ru/dev/maps/geocoder/).
 - `ROLLBAR_ACCESS_TOKEN` — ключ для доступа к системе мониторига Rollbar который можно получить в [панели управления своего аккаунта](https://rollbar.com/).
 - `ROLLBAR_ENVIRONMENT`— название окружения сайта в Rollbar, например 'development', 'production' и т.д. Позволяет фильтровать ошибки по названию инсталяции.
+- `DATABASE_URL` — адрес для подключения к базе данных PostgreSQL. Например: `postgres://user:password@localhost:5432/db_name`.
 
 ## Цели проекта
 
