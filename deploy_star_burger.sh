@@ -10,7 +10,6 @@ echo -e "\n${BOLD}Загрузка изменений из репозитори�
 git pull
 
 COMMIT=`git rev-parse --short HEAD`
-echo -e "${COMMIT}"
 
 echo -e "\n${BOLD}Установка библиотек для Python...${BOLD_END}"
 source venv/bin/activate
@@ -33,6 +32,6 @@ systemctl restart starburger.service
 systemctl reload nginx.service
 
 echo -e "\n${BOLD}Отправка уведомления в Rollbar...${BOLD_END}"
-curl -H "X-Rollbar-Access-Token: $ROLLBAR_ACCESS_TOKEN" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d '{"environment": "production", "revision": "'$COMMIT'", "status": "succeeded"}'
+curl -H "X-Rollbar-Access-Token: $ROLLBAR_ACCESS_TOKEN" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d '{"environment": "'$ROLLBAR_ENVIRONMENT'", "revision": "'$COMMIT'", "local_username": "'$USER'", "status": "succeeded"}'
 
 echo -e "\n${BOLD}Деплой проекта успешно завершён!${BOLD_END}"
