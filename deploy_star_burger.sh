@@ -9,6 +9,9 @@ cd /opt/star-burger/
 echo -e "\n${BOLD}Загрузка изменений из репозитория...${BOLD_END}"
 git pull
 
+COMMIT=`git rev-parse --short HEAD`
+echo -e "${COMMIT}"
+
 echo -e "\n${BOLD}Установка библиотек для Python...${BOLD_END}"
 source venv/bin/activate
 pip install -r requirements.txt
@@ -28,5 +31,8 @@ venv/bin/python manage.py migrate --no-input
 echo -e "\n${BOLD}Перезапуск сервисов Systemd...${BOLD_END}"
 systemctl restart starburger.service
 systemctl reload nginx.service
+
+echo -e "\n${BOLD}Отправка уведомления в Rollbar...${BOLD_END}"
+curl -H "X-Rollbar-Access-Token: $ROLLBAR_ACCESS_TOKEN" -H "Content-Type: application/json" -X POST 'https://api.rollbar.com/api/1/deploy' -d '{"environment": "production", "revision": "'$COMMIT'", "status": "succeeded"}'
 
 echo -e "\n${BOLD}Деплой проекта успешно завершён!${BOLD_END}"
