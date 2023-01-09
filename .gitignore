@@ -144,3 +144,6 @@ cython_debug/
 .parcel-cache/
 .vscode/
 staticfiles/
+
+package-lock.json
+data.json
