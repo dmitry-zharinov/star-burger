@@ -22,7 +22,7 @@ echo -e "\n${BOLD}Сборка фронтенда...${BOLD_END}"
 parcel build bundles-src/index.js -d bundles --no-minify --public-url="./"
 
 echo -e "\n${BOLD}Сборка статики Django...${BOLD_END}"
-yes yes | venv/bin/python manage.py collectstatic --no-input
+venv/bin/python manage.py collectstatic --no-input
 
 echo -e "\n${BOLD}Применение миграций...${BOLD_END}"
 venv/bin/python manage.py migrate --no-input
