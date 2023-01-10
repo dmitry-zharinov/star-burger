@@ -145,5 +145,4 @@ cython_debug/
 .vscode/
 staticfiles/
 
-package-lock.json
 data.json
